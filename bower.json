@@ -1,11 +1,11 @@
 {
-  "name": "angular-bootstrap-calendar",
-  "version": "0.7.0",
-  "homepage": "https://github.com/mattlewis92/angular-bootstrap-calendar",
+  "name": "mmi-angular-bootstrap-calendar",
+  "version": "0.1.0",
+  "homepage": "https://github.com/jordanfarrer/angular-bootstrap-calendar",
   "authors": [
     "Matt Lewis <matt@iwaz.at>"
   ],
-  "description": "A pure AngularJS bootstrap themed responsive calendar that can display events and has views for year, month, week and day",
+  "description": "A fork of Matt Lewis angular-bootstrap-calendar (https://github.com/mattlewis92/angular-bootstrap-calendar)",
   "main": [
     "dist/js/angular-bootstrap-calendar-tpls.min.js",
     "dist/css/angular-bootstrap-calendar.min.css"
