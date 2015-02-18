@@ -40,7 +40,6 @@ angular.module('mwl.calendar')
                   if (scope.autoOpen && !firstRun) {
                       scope.view.forEach(function (week, rowIndex) {
                           week.forEach(function (day, cellIndex) {
-                              day.title = $sce.trustAsHtml(day.title);
                               if (day.inMonth && moment(scope.currentDay).startOf('day').isSame(day.date.startOf('day'))) {
                                   scope.dayClicked(rowIndex, cellIndex);
                                   $timeout(function () {
