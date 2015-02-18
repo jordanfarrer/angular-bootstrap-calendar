@@ -8,7 +8,9 @@
   "description": "A fork of Matt Lewis angular-bootstrap-calendar (https://github.com/mattlewis92/angular-bootstrap-calendar)",
   "main": [
     "dist/js/angular-bootstrap-calendar-tpls.min.js",
-    "dist/css/angular-bootstrap-calendar.min.css"
+    "dist/js/angular-bootstrap-calendar-tpls.min.js.map",
+    "dist/css/angular-bootstrap-calendar.min.css",
+    "dist/css/angular-bootstrap-calendar.min.css.map"
   ],
   "keywords": [
     "AngularJS",
