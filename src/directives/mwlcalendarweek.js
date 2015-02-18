@@ -7,34 +7,37 @@
  * # mwlCalendarWeek
  */
 angular.module('mwl.calendar')
-  .directive('mwlCalendarWeek', function(moment, calendarHelper) {
-    return {
-      templateUrl: 'templates/week.html',
-      restrict: 'EA',
-      require: '^mwlCalendar',
-      scope: {
-        events: '=calendarEvents',
-        currentDay: '=calendarCurrentDay',
-        eventClick: '=calendarEventClick',
-        useIsoWeek: '=calendarUseIsoWeek'
-      },
-      link: function postLink(scope, element, attrs, calendarCtrl) {
+  .directive('mwlCalendarWeek', function (moment, calendarHelper) {
+      return {
+          templateUrl: 'templates/week.html',
+          restrict: 'EA',
+          require: '^mwlCalendar',
+          scope: {
+              events: '=calendarEvents',
+              currentDay: '=calendarCurrentDay',
+              eventClick: '=calendarEventClick',
+              useIsoWeek: '=calendarUseIsoWeek',
+              disableDayView: '=disableDayView'
+          },
+          link: function postLink(scope, element, attrs, calendarCtrl) {
 
-        calendarCtrl.titleFunctions.week = function(currentDay) {
-          return 'Week ' + moment(currentDay).week() + ' of ' + moment(currentDay).format('YYYY');
-        };
+              calendarCtrl.titleFunctions.week = function (currentDay) {
+                  return 'Week ' + moment(currentDay).week() + ' of ' + moment(currentDay).format('YYYY');
+              };
 
-        function updateView() {
-          scope.view = calendarHelper.getWeekView(scope.events, scope.currentDay, scope.useIsoWeek);
-        }
+              function updateView() {
+                  scope.view = calendarHelper.getWeekView(scope.events, scope.currentDay, scope.useIsoWeek);
+              }
 
-        scope.drillDown = function(day) {
-          calendarCtrl.changeView('day', moment(scope.currentDay).clone().date(day).toDate());
-        };
+              scope.drillDown = function (day) {
+                  if (!scope.disableDayView) {
+                      calendarCtrl.changeView('day', moment(scope.currentDay).clone().date(day).toDate());
+                  }
+              };
 
-        scope.$watch('currentDay', updateView);
-        scope.$watch('events', updateView, true);
+              scope.$watch('currentDay', updateView);
+              scope.$watch('events', updateView, true);
 
-      }
-    };
+          }
+      };
   });

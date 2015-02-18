@@ -21,7 +21,8 @@ angular.module('mwl.calendar')
               editEventHtml: '=calendarEditEventHtml',
               deleteEventHtml: '=calendarDeleteEventHtml',
               autoOpen: '=calendarAutoOpen',
-              useIsoWeek: '=calendarUseIsoWeek'
+              useIsoWeek: '=calendarUseIsoWeek',
+              disableDayView: '=disableDayView'
           },
           link: function postLink(scope, element, attrs, calendarCtrl) {
 
@@ -66,7 +67,9 @@ angular.module('mwl.calendar')
               };
 
               scope.drillDown = function (day) {
-                  calendarCtrl.changeView('day', moment(scope.currentDay).clone().date(day).toDate());
+                  if (!scope.disableDayView) {
+                      calendarCtrl.changeView('day', moment(scope.currentDay).clone().date(day).toDate());
+                  }
               };
 
               scope.highlightEvent = function (event, shouldAddClass) {

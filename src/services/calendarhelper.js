@@ -29,7 +29,7 @@ angular.module('mwl.calendar')
 
           var months = [];
           for (var i = 0; i <= 11; i++) {
-              months.push($filter('date')(new Date(2014, i), format));
+              months.push(moment(new Date(2014, i)).format(format));
           }
 
           return months;
@@ -184,8 +184,8 @@ angular.module('mwl.calendar')
               var date = moment(currentDay).subtract(currentWeekDayIndex - i, 'days').add(dateOffset, 'day').toDate();
               columns[i] = {
                   weekDay: weekDays[i],
-                  day: $filter('date')(date, 'd'),
-                  date: $filter('date')(date, 'd MMM'),
+                  day: moment(date).format('D'),
+                  date: moment(date).format('D MMM'),
                   isToday: moment(date).startOf('day').isSame(moment().startOf('day'))
               };
               if (i == 0) {
@@ -199,8 +199,8 @@ angular.module('mwl.calendar')
               var date = moment(currentDay).add(i - currentWeekDayIndex, 'days').add(dateOffset, 'day').toDate();
               columns[i] = {
                   weekDay: weekDays[i],
-                  day: $filter('date')(date, 'd'),
-                  date: $filter('date')(date, 'd MMM'),
+                  day: moment(date).format('D'),
+                  date: moment(date).format('D MMM'),
                   isToday: moment(date).startOf('day').isSame(moment().startOf('day'))
               };
               if (i == 0) {

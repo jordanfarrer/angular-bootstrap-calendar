@@ -56,7 +56,7 @@ angular.module('mwl.calendar')
 
           var months = [];
           for (var i = 0; i <= 11; i++) {
-              months.push($filter('date')(new Date(2014, i), format));
+              months.push(moment(new Date(2014, i)).format(format));
           }
 
           return months;
@@ -211,8 +211,8 @@ angular.module('mwl.calendar')
               var date = moment(currentDay).subtract(currentWeekDayIndex - i, 'days').add(dateOffset, 'day').toDate();
               columns[i] = {
                   weekDay: weekDays[i],
-                  day: $filter('date')(date, 'd'),
-                  date: $filter('date')(date, 'd MMM'),
+                  day: moment(date).format('D'),
+                  date: moment(date).format('D MMM'),
                   isToday: moment(date).startOf('day').isSame(moment().startOf('day'))
               };
               if (i == 0) {
@@ -226,8 +226,8 @@ angular.module('mwl.calendar')
               var date = moment(currentDay).add(i - currentWeekDayIndex, 'days').add(dateOffset, 'day').toDate();
               columns[i] = {
                   weekDay: weekDays[i],
-                  day: $filter('date')(date, 'd'),
-                  date: $filter('date')(date, 'd MMM'),
+                  day: moment(date).format('D'),
+                  date: moment(date).format('D MMM'),
                   isToday: moment(date).startOf('day').isSame(moment().startOf('day'))
               };
               if (i == 0) {
@@ -369,6 +369,25 @@ angular.module('mwl.calendar')
 
 'use strict';
 
+
+angular.module('mwl.calendar')
+  .filter('truncateEventTitle', function() {
+
+    return function(string, length, boxHeight) {
+      if (!string) return '';
+
+      //Only truncate if if actually needs truncating
+      if (string.length >= length && string.length / 20 > boxHeight / 30) {
+        return string.substr(0, length) + '...';
+      } else {
+        return string;
+      }
+    };
+
+  });
+
+'use strict';
+
 /**
  * @ngdoc directive
  * @name angularBootstrapCalendarApp.directive:mwlCalendarYear
@@ -447,36 +466,39 @@ angular.module('mwl.calendar')
  * # mwlCalendarWeek
  */
 angular.module('mwl.calendar')
-  .directive('mwlCalendarWeek', ["moment", "calendarHelper", function(moment, calendarHelper) {
-    return {
-      templateUrl: 'templates/week.html',
-      restrict: 'EA',
-      require: '^mwlCalendar',
-      scope: {
-        events: '=calendarEvents',
-        currentDay: '=calendarCurrentDay',
-        eventClick: '=calendarEventClick',
-        useIsoWeek: '=calendarUseIsoWeek'
-      },
-      link: function postLink(scope, element, attrs, calendarCtrl) {
+  .directive('mwlCalendarWeek', ["moment", "calendarHelper", function (moment, calendarHelper) {
+      return {
+          templateUrl: 'templates/week.html',
+          restrict: 'EA',
+          require: '^mwlCalendar',
+          scope: {
+              events: '=calendarEvents',
+              currentDay: '=calendarCurrentDay',
+              eventClick: '=calendarEventClick',
+              useIsoWeek: '=calendarUseIsoWeek',
+              disableDayView: '=disableDayView'
+          },
+          link: function postLink(scope, element, attrs, calendarCtrl) {
 
-        calendarCtrl.titleFunctions.week = function(currentDay) {
-          return 'Week ' + moment(currentDay).week() + ' of ' + moment(currentDay).format('YYYY');
-        };
+              calendarCtrl.titleFunctions.week = function (currentDay) {
+                  return 'Week ' + moment(currentDay).week() + ' of ' + moment(currentDay).format('YYYY');
+              };
 
-        function updateView() {
-          scope.view = calendarHelper.getWeekView(scope.events, scope.currentDay, scope.useIsoWeek);
-        }
+              function updateView() {
+                  scope.view = calendarHelper.getWeekView(scope.events, scope.currentDay, scope.useIsoWeek);
+              }
 
-        scope.drillDown = function(day) {
-          calendarCtrl.changeView('day', moment(scope.currentDay).clone().date(day).toDate());
-        };
+              scope.drillDown = function (day) {
+                  if (!scope.disableDayView) {
+                      calendarCtrl.changeView('day', moment(scope.currentDay).clone().date(day).toDate());
+                  }
+              };
 
-        scope.$watch('currentDay', updateView);
-        scope.$watch('events', updateView, true);
+              scope.$watch('currentDay', updateView);
+              scope.$watch('events', updateView, true);
 
-      }
-    };
+          }
+      };
   }]);
 
 'use strict';
@@ -502,7 +524,8 @@ angular.module('mwl.calendar')
               editEventHtml: '=calendarEditEventHtml',
               deleteEventHtml: '=calendarDeleteEventHtml',
               autoOpen: '=calendarAutoOpen',
-              useIsoWeek: '=calendarUseIsoWeek'
+              useIsoWeek: '=calendarUseIsoWeek',
+              disableDayView: '=disableDayView'
           },
           link: function postLink(scope, element, attrs, calendarCtrl) {
 
@@ -547,7 +570,9 @@ angular.module('mwl.calendar')
               };
 
               scope.drillDown = function (day) {
-                  calendarCtrl.changeView('day', moment(scope.currentDay).clone().date(day).toDate());
+                  if (!scope.disableDayView) {
+                      calendarCtrl.changeView('day', moment(scope.currentDay).clone().date(day).toDate());
+                  }
               };
 
               scope.highlightEvent = function (event, shouldAddClass) {
@@ -645,95 +670,77 @@ angular.module('mwl.calendar')
  */
 angular.module('mwl.calendar')
   .directive('mwlCalendar', function () {
-    return {
-      templateUrl: 'templates/main.html',
-      restrict: 'EA',
-      scope: {
-        events: '=calendarEvents',
-        view: '=calendarView',
-        currentDay: '=calendarCurrentDay',
-        control: '=calendarControl',
-        eventClick: '&calendarEventClick',
-        eventEditClick: '&calendarEditEventClick',
-        eventDeleteClick: '&calendarDeleteEventClick',
-        editEventHtml: '=calendarEditEventHtml',
-        deleteEventHtml: '=calendarDeleteEventHtml',
-        autoOpen: '=calendarAutoOpen',
-        useIsoWeek: '=calendarUseIsoWeek',
-        eventLabel: '@calendarEventLabel',
-        timeLabel: '@calendarTimeLabel',
-        dayViewStart:'@calendarDayViewStart',
-        dayViewEnd:'@calendarDayViewEnd'
-      },
-      controller: ["$scope", "$timeout", "$locale", "moment", function($scope, $timeout, $locale, moment) {
+      return {
+          templateUrl: 'templates/main.html',
+          restrict: 'EA',
+          scope: {
+              events: '=calendarEvents',
+              view: '=calendarView',
+              currentDay: '=calendarCurrentDay',
+              control: '=calendarControl',
+              eventClick: '&calendarEventClick',
+              eventEditClick: '&calendarEditEventClick',
+              eventDeleteClick: '&calendarDeleteEventClick',
+              editEventHtml: '=calendarEditEventHtml',
+              deleteEventHtml: '=calendarDeleteEventHtml',
+              autoOpen: '=calendarAutoOpen',
+              useIsoWeek: '=calendarUseIsoWeek',
+              eventLabel: '@calendarEventLabel',
+              timeLabel: '@calendarTimeLabel',
+              dayViewStart: '@calendarDayViewStart',
+              dayViewEnd: '@calendarDayViewEnd',
+              disableDayView: '=disableDayView'
+          },
+          controller: ["$scope", "$timeout", "$locale", "moment", function ($scope, $timeout, $locale, moment) {
 
-        var self = this;
+              var self = this;
 
-        this.titleFunctions = {};
+              this.titleFunctions = {};
 
-        this.changeView = function(view, newDay) {
-          $scope.view = view;
-          $scope.currentDay = newDay;
-        };
+              this.changeView = function (view, newDay) {
+                  $scope.view = view;
+                  $scope.currentDay = newDay;
+              };
 
-        $scope.control = $scope.control || {};
+              $scope.control = $scope.control || {};
 
-        $scope.control.prev = function() {
-          $scope.currentDay = moment($scope.currentDay).subtract(1, $scope.view).toDate();
-        };
+              $scope.control.prev = function () {
+                  $scope.currentDay = moment($scope.currentDay).subtract(1, $scope.view).toDate();
+              };
 
-        $scope.control.next = function() {
-          $scope.currentDay = moment($scope.currentDay).add(1, $scope.view).toDate();
-        };
+              $scope.control.next = function () {
+                  $scope.currentDay = moment($scope.currentDay).add(1, $scope.view).toDate();
+              };
 
-        $scope.control.getTitle = function() {
-          if (!self.titleFunctions[$scope.view]) {
-            return '';
-          }
-          return self.titleFunctions[$scope.view]($scope.currentDay);
-        };
+              $scope.control.getTitle = function () {
+                  if (!self.titleFunctions[$scope.view]) {
+                      return '';
+                  }
+                  return self.titleFunctions[$scope.view]($scope.currentDay);
+              };
 
-        //Auto update the calendar when the locale changes
-        var firstRunWatcher = true;
-        var unbindWatcher = $scope.$watch(function() {
-          return moment.locale() + $locale.id;
-        }, function() {
-          if (firstRunWatcher) { //dont run the first time the calendar is initialised
-            firstRunWatcher = false;
-            return;
-          }
-          var originalView = angular.copy($scope.view);
-          $scope.view = 'redraw';
-          $timeout(function() { //bit of a hacky way to redraw the calendar, should be refactored at some point
-            $scope.view = originalView;
-          });
-        });
+              //Auto update the calendar when the locale changes
+              var firstRunWatcher = true;
+              var unbindWatcher = $scope.$watch(function () {
+                  return moment.locale() + $locale.id;
+              }, function () {
+                  if (firstRunWatcher) { //dont run the first time the calendar is initialised
+                      firstRunWatcher = false;
+                      return;
+                  }
+                  var originalView = angular.copy($scope.view);
+                  $scope.view = 'redraw';
+                  $timeout(function () { //bit of a hacky way to redraw the calendar, should be refactored at some point
+                      $scope.view = originalView;
+                  });
+              });
 
-        //Remove the watcher when the calendar is destroyed
-        var unbindDestroyListener = $scope.$on('$destroy', function() {
-          unbindDestroyListener();
-          unbindWatcher();
-        });
+              //Remove the watcher when the calendar is destroyed
+              var unbindDestroyListener = $scope.$on('$destroy', function () {
+                  unbindDestroyListener();
+                  unbindWatcher();
+              });
 
-      }]
-    };
-  });
-
-'use strict';
-
-
-angular.module('mwl.calendar')
-  .filter('truncateEventTitle', function() {
-
-    return function(string, length, boxHeight) {
-      if (!string) return '';
-
-      //Only truncate if if actually needs truncating
-      if (string.length >= length && string.length / 20 > boxHeight / 30) {
-        return string.substr(0, length) + '...';
-      } else {
-        return string;
-      }
-    };
-
+          }]
+      };
   });
