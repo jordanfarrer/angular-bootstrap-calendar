@@ -22,7 +22,9 @@
                            ng-mouseenter="highlightEvent(event, true)"
                            ng-mouseleave="highlightEvent(event, false)"
                            tooltip-append-to-body="true"
-                           tooltip="{{ event.title }}"></a>
+                           tooltip="{{ event.title }}">
+                            <i class="fa" ng-class="event.icon_name"></i>
+                        </a>
                     </div>
                 </div>
             </div>
