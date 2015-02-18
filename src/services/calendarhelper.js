@@ -38,7 +38,7 @@ angular.module('mwl.calendar')
 
       this.getWeekDayNames = function (short, useISOWeek) {
 
-          var format = short ? 'EEE' : 'EEEE';
+          var format = short ? 'ddd' : 'dddd';
 
           var weekdays = [];
           var startDay = isISOWeek(useISOWeek) ? 22 : 21;
